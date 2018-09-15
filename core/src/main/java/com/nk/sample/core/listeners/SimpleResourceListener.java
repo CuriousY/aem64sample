@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
            })
 public class SimpleResourceListener implements EventHandler {
 
+	//test comment
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public void handleEvent(final Event event) {
