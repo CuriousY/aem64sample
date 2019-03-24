@@ -19,30 +19,63 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.DefaultInjectionStrategy;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.settings.SlingSettingsService;
 
-@Model(adaptables=Resource.class)
+import com.nk.sample.service.IGetUserService;
+
+@Model(adaptables = {Resource.class},defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class HelloWorldModel {
 
-    @Inject
-    private SlingSettingsService settings;
+	protected static final String RESOURCE_TYPE = "AEM64Sample/components/content/helloworld";
+	@Inject
+	private SlingSettingsService settings;
 
-    @Inject @Named("sling:resourceType") @Default(values="No resourceType")
-    protected String resourceType;
+	@Inject
+	@Named("sling:resourceType")
+	@Default(values = "No resourceType")
+	protected String resourceType;
 
-    private String message;
+	@Inject
+	@Named("text")
+	private String text;
 
-    @PostConstruct
-    protected void init() {
-        message = "\tHello World!\n";
-        message += "\tThis is instance: " + settings.getSlingId() + "\n";
-        message += "\tResource type is: " + resourceType + "\n";
-    }
+	@Inject
+	private IGetUserService getUserService;
 
-    public String getMessage() {
-        return message;
-    }
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+	private String message;
+	
+	private String userName;
+
+	@PostConstruct
+	protected void init() {
+		message = "User ID " + text;
+		message += " Hello user from service " + getUserName();
+	}
+
+	public String getUserName() {
+		
+		JSONObject userObj = getUserService.getUserByID(text);
+		userName = userObj != null ? userObj.optString("name") : "";
+
+		return userName;
+	}
+
+	public String getMessage() {
+		return message;
+	}
 }

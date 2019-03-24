@@ -1,60 +1,83 @@
-/*
- *  Copyright 2015 Adobe Systems Incorporated
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 package com.nk.sample.core.models;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.util.UUID;
+import static org.junit.Assert.*;
 
-import junitx.util.PrivateAccessor;
+import javax.inject.Inject;
 
-import org.apache.sling.settings.SlingSettingsService;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.hamcrest.core.IsEqual;
+import static org.hamcrest.Matcher.*;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import static org.mockito.ArgumentMatchers.*;
+import org.mockito.Mock;
+import org.mockito.internal.matchers.GreaterThan;
+
+import static org.mockito.Mockito.*;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.day.cq.wcm.api.Page;
+import com.nk.sample.service.IGetUserService;
+
+import io.wcm.testing.mock.aem.junit.AemContext;
+
 
 /**
  * Simple JUnit test verifying the HelloWorldModel
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TestHelloWorldModel {
 
-    //@Inject
-    private HelloWorldModel hello;
     
-    private String slingId;
+    private HelloWorldModel model;
+    
+    
+    private Resource resource;
+    
+    @Mock
+	private IGetUserService getUserService;
+    
+    private String userString = "{ \"id\": 1, \"name\": \"Leanne Graham\", \"username\": \"Bret\"}";
+    
+
+    @Rule
+    public final AemContext context = new AemContext();
+    
     
     @Before
     public void setup() throws Exception {
-        SlingSettingsService settings = mock(SlingSettingsService.class);
-        slingId = UUID.randomUUID().toString();
-        when(settings.getSlingId()).thenReturn(slingId);
-
-        hello = new HelloWorldModel();
-        PrivateAccessor.setField(hello, "settings", settings);
-        hello.init();
+    	context.addModelsForClasses(HelloWorldModel.class);
+    	context.load().json("/com/nk/sample/core/models/TestHelloWorldModel.json", "/content");
+    	context.currentResource("/content/helloworld");
+    	when(getUserService.getUserByID(anyString())).thenReturn(new JSONObject(userString));
+    	context.registerService(IGetUserService.class, getUserService, 
+				org.osgi.framework.Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+    	
+    	Resource resource = context.resourceResolver().getResource("/content/helloworld");    	
+    	model = resource.adaptTo(HelloWorldModel.class);
+    	
+    	
     }
     
     @Test
-    public void testGetMessage() throws Exception {
-        // some very basic junit tests
-        String msg = hello.getMessage();
-        assertNotNull(msg);
-        assertTrue(msg.length() > 0);
+    public void getTextShouldNotReturnNull() {
+    	assertNotNull(model.getText());
+    }
+    
+    @Test
+    public void getUserNameShouldNotBeNull() {
+    	assertNotNull(model.getUserName());
+    }
+    
+    @Test
+    public void getUserNameShouldReturnValue() {
+    	System.out.println("string length " + model.getUserName().length());
+    	assertEquals("Length should be greater than zero", model.getUserName().length() > 0, true);
     }
 
 }

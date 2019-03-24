@@ -1,0 +1,7 @@
+{
+  "helloworld": {
+    "jcr:primaryType": "nt:unstructured",
+    "sling:resourceType": "AEM64Sample/components/content/helloworld",
+    "text" : "John Doe"
+  }
+}
