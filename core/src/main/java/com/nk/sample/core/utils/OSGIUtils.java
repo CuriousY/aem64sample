@@ -31,7 +31,7 @@ public class OSGIUtils {
 	            /**
 	            * Get the BundleContext associated with the passed class reference.
 	            */
-	            BundleContext bundleContext = FrameworkUtil.getBundle(serviceClass).getBundleContext();
+	            BundleContext bundleContext = FrameworkUtil.getBundle(serviceClass).getBundleContext();	            
 	            ServiceReference osgiRef = bundleContext.getServiceReference(serviceClass);
 	            T serviceRef = (T) bundleContext.getService(osgiRef);
 	            return serviceRef;

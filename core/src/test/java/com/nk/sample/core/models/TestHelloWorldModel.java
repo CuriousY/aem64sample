@@ -52,6 +52,7 @@ public class TestHelloWorldModel {
     @Before
     public void setup() throws Exception {
     	context.addModelsForClasses(HelloWorldModel.class);
+    	
     	context.load().json("/com/nk/sample/core/models/TestHelloWorldModel.json", "/content");
     	context.currentResource("/content/helloworld");
     	when(getUserService.getUserByID(anyString())).thenReturn(new JSONObject(userString));
