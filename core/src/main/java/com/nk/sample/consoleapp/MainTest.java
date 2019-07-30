@@ -1,0 +1,66 @@
+package com.nk.sample.core;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStream;
+//import java.util.Base64;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.nio.charset.StandardCharsets;
+
+public class MainTest {
+
+	public static void main(String[] args) {
+		String filename = "/Users/a787223/tmp/txtnew1.pdf";
+		String test = "VW5pdGVkSGVhbHRoY2FyZSBJbnN1cmFuY2UgQ29tcGFueQpFeHBhdHJpYXRlIEluc3VyYW5jZQpQTyBCb3ggNzQwMTExCkF0bGFudGEsIEdBIDMwMzc0LTAxMTEKRGF0ZTo3LzI0LzIwMTkKKzEtODc3LTg0NC0wMjgwIG9yIENhbGwgQ29sbGVjdCArMS03NjMtMjc0LTczNjIKTWVtYmVyIEluZm9ybWF0aW9uCk1lbWJlcjogTkFOREhVIE5BSVIKTWVtYmVyIElEOiA5NTc5MTQwOTkKR1JPVVAgTkFNRTogT09QIE1BWCBBY2NlbnR1cmUgTkIxNQpHUk9VUCBOVU1CRVI6IDA5MDkwNjcKUEFZTUVOVCBOVU1CRVI6ClBBWU1FTlQgQU1PVU5UOgpQQVlNRU5UIERBVEU6Ck5BTkRIVSBOQUlSCk5BTkRIVSBOQUlSCjI2NyBzdHJlZXQKMjY3IHN0cmVldApDb25qdW50byB1cmJhbm8gcmVzaWRlbmNpYWwKSVJNIEZFQiBPRkYgQ1lDTEUKNzg3ODc4Ck1lbWJlciBCZW5lZml0cyBSZXByZXNlbnRhdGlvbgpZb3Ugd2lsbCBhbHNvIHJlY2VpdmUgYW4gRXhwbGFuYXRpb24gb2YgQmVuZWZpdHMKQ2xhaW1zIFN1bW1hcnkKRGV0YWlsZWQgY2xhaW0gaW5mb3JtYXRpb24gaXMgbG9jYXRlZCBvbiB0aGUgZm9sbG93aW5nIHBhZ2VzKHMpLgpEb2xsYXIgQW1vdW50IERlc2NyaXB0aW9uCiQxMDAwLgowMApBbW91bnQgQmlsbGVkClRoaXMgaXMgdGhlIHRvdGFsIGFtb3VudCB0aGF0IHlvdXIgcHJvdmlkZXIgYmlsbGVkIGZvciB0aGUgc2VydmljZXMgdGhhdCB3ZXJlIHByb3ZpZGVkIHRvIHlvdS4KJDAuMDAgUGxhbiBEaXNjb3VudHMKWW91ciBwbGFuIG5lZ290aWF0ZXMgZGlzY291bnRzIHdpdGggcHJvdmlkZXJzIHRvIHNhdmUgeW91IG1vbmV5LiBUaGlzIGFtb3VudCBtYXkgYWxzbyBpbmNsdWRlIHNlcnZpY2VzIHRoYXQgeW91IGFyZSBub3QgcmVzcG9uc2libGUgdG8gcGF5LgokMTAwMC4KMDAKWW91ciBQbGFuIFBhaWQKVGhpcyBpcyB0aGUgcG9ydGlvbiBvZiB0aGUgYW1vdW50IGJpbGxlZCB0aGF0IHdhcyBwYWlkIGJ5IHlvdXIgcGxhbi4uCiQwLjAwIFRvdGFsIGFtb3VudCB5b3Ugb3dlIHRoZSBwcm92aWRlcihzKQpUaGUgcG9ydGlvbiBvZiB0aGUgYW1vdW50IGJpbGxlZCB5b3Ugb3dlIHRoZSBwcm92aWRlcihzKS4gVGhpcyBhbW91bnQgZG9lcyBub3QgcmVmbGVjdCBhbnkgcGF5bWVudCB5b3UgbWF5IGhhdmUgYWxyZWFkeSBtYWRlIGF0IHRoZSB0aW1lIHlvdQpyZWNlaXZlZCBjYXJlIG9yIGFueSBhbW91bnQgdGhhdCBtYXkgaGF2ZSBiZWVuIHBhaWQgdG8geW91LiBUaGlzIGFtb3VudCBtYXkgaW5jbHVkZSB5b3VyIGRlZHVjdGlibGUsIGNvLXBheSwgY29pbnN1cmFuY2UgYW5kIC8gb3Igbm9uIGNvdmVyZWQKY2hhcmdlcy4gLgpDbGFpbSBEZXRhaWw6ClByb3ZpZGVyOiBKSVJMTFYgS0NIS0RPSlFNCkdIIENsYWltIE51bWJlcjogMTAyMTgyNwpBbGwgdmFsdWVzIGJlbG93IGFyZSBpbiBVUyBkb2xsYXJzREFURShTCikgT0YKU0VSVklDCkUKVFlQRSBPRgpTRVJWSUNFUwpOT1RFClMqCkFNT1VOClQKQklMTEVEClBMQU4KRElTQ09VTlQKUwpZT1VSClBMQU4KUEFJRApERURVQ1RJCkJMRSBDT1BBWQpDT0lOU1VSQQpOQ0UKTk9ULQpDT1ZFUkVECkFNT1VOVApZT1UKT1dFCjEwLzIzLzIKMDE1Ck9QIE1JU0MuClNFUlZJQ0VTCjEwMDAuMDAgMC4wMCAxMDAwLjAwIDAuMDAgMTAwMC4wMCAwLjAwIDEwMDAuMDAgMC4wMAoxMC8yMy8yCjAxNQpPUCBNSVNDLgpTRVJWSUNFUwoxMDAwLjAwIDAuMDAgMTAwMC4wMCAwLjAwIDEwMDAuMDAgMC4wMCAxMDAwLjAwIDAuMDAKMTAvMjMvMgowMTUKT1AgTUlTQy4KU0VSVklDRVMKMzQ1Njc4LgozMwowLjAwIDM0NTY3OC4zMyAwLjAwIDM0NTY3OC4KMzMKMC4wMCAzNDU2NzguMzMgMC4wMApDT05UUgpPTCAjCjc4Nzk3ODIyNAo2MDEKQ0xBSU0KVE9UQUw6CiQxMDAwLjAKMAokMC4wMCAkMTAwMC4wMCAkMC4wMCAkMTAwMC4wCjAKJDAuMDAgJDEwMDAuMDAgJDAuMDAKTm90ZXMKKE5CICkKKE5CICkKKE5CICk";
+		//byte[] byteArray = Base64.decodeBase64(test);
+		//byte[] byteArray  = Base64.getDecoder().decode(test);
+		
+		byte[] dd=test.getBytes();
+		byte[] byteArray = Base64.decodeBase64(dd);
+
+		String value = new String(byteArray);
+		Document pdfDoc = new Document(PageSize.A4);
+
+		try {
+
+			PdfWriter.getInstance(pdfDoc, new FileOutputStream(filename)).setPdfVersion(PdfWriter.PDF_VERSION_1_7);
+
+
+			pdfDoc.open();
+
+			Font f = new Font();
+			f.setStyle(Font.BOLD);
+			f.setSize(8);
+			Paragraph paragraph = new Paragraph(new String(byteArray,StandardCharsets.UTF_16LE), f);
+			
+
+			pdfDoc.add(paragraph);
+			paragraph.setIndentationLeft(100);
+			paragraph.setIndentationRight(100);
+			paragraph.setAlignment(Element.ALIGN_CENTER);
+
+			pdfDoc.close();
+
+		}
+
+		catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+		}
+	}
+}
